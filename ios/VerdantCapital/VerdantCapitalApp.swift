@@ -1,25 +1,47 @@
 import SwiftUI
+import SwiftData
 
 @main
 struct VerdantCapitalApp: App {
+    @State private var store = VerdantStore()
+
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            VerdantRootView()
+                .environment(store)
+                .preferredColorScheme(.light)
         }
+        .modelContainer(for: [LocalOrder.self])
     }
 }
 
-struct ContentView: View {
+struct VerdantRootView: View {
+    @Environment(\.modelContext) private var modelContext
+
     var body: some View {
-        VStack(spacing: 16) {
-            Image(systemName: "sparkles")
-                .font(.largeTitle)
-            Text("Your app is ready.")
-                .font(.title)
-                .fontWeight(.semibold)
-            Text("Ask 10x to start building.")
-                .foregroundStyle(.secondary)
+        TabView {
+            ShopView()
+                .tabItem { Label("Shop", systemImage: "basket") }
+
+            DiscoverView()
+                .tabItem { Label("Discover", systemImage: "leaf") }
+
+            AssistantView()
+                .tabItem { Label("Assistant", systemImage: "sparkles") }
+
+            OrdersView()
+                .tabItem { Label("Orders", systemImage: "shippingbox") }
+
+            AccountView()
+                .tabItem { Label("Account", systemImage: "person.crop.circle") }
         }
-        .padding()
+        .tint(AppTokens.accent)
+        .task { DemoSeeder.seedIfNeeded(context: modelContext) }
     }
+}
+
+#Preview {
+    VerdantRootView()
+        .environment(VerdantStore())
+        .modelContainer(for: [LocalOrder.self], inMemory: true)
 }
